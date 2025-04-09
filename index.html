@@ -70,16 +70,27 @@
         const response = await fetch(`https://emailvalidation.abstractapi.com/v1/?api_key=${apiKey}&email=${email}`);
         const data = await response.json();
 
-        if (data.deliverability === "DELIVERABLE") {
-          resultDiv.textContent = "✅ Valid Email";
-          resultDiv.style.color = "green";
-        } else if (data.is_disposable_email && data.is_disposable_email.value) {
-          resultDiv.textContent = "⚠️ Disposable Email";
-          resultDiv.style.color = "orange";
-        } else {
-          resultDiv.textContent = "❌ Invalid Email";
+        if (data.deliverability !== "DELIVERABLE") {
+          resultDiv.textContent = "❌ Invalid or undeliverable email.";
           resultDiv.style.color = "red";
+          return;
         }
+
+        if (data.is_disposable_email && data.is_disposable_email.value) {
+          resultDiv.textContent = "⚠️ Disposable Email (temporary email service)";
+          resultDiv.style.color = "orange";
+          return;
+        }
+
+        if (data.is_role_email && data.is_role_email.value) {
+          resultDiv.textContent = "⚠️ Role-based Email (like admin@, info@)";
+          resultDiv.style.color = "orange";
+          return;
+        }
+
+        resultDiv.textContent = "✅ Valid & Deliverable Email";
+        resultDiv.style.color = "green";
+
       } catch (error) {
         resultDiv.textContent = "Error checking email.";
         resultDiv.style.color = "red";
